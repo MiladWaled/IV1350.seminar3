@@ -1,15 +1,21 @@
 package se.kth.iv1350.processsale.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import se.kth.iv1350.processsale.integration.AccountingSystem;
 import se.kth.iv1350.processsale.integration.ExternalSystemHandler;
+import se.kth.iv1350.processsale.integration.InvalidItemIDException;
 import se.kth.iv1350.processsale.integration.InventorySystem;
 import se.kth.iv1350.processsale.integration.ItemDTO;
 import se.kth.iv1350.processsale.integration.ItemRegistry;
+import se.kth.iv1350.processsale.integration.ItemRegistryException;
 import se.kth.iv1350.processsale.integration.Printer;
 import se.kth.iv1350.processsale.integration.RegistryHandler;
 import se.kth.iv1350.processsale.model.CashRegister;
 import se.kth.iv1350.processsale.model.Change;
 import se.kth.iv1350.processsale.model.Payment;
+import se.kth.iv1350.processsale.model.PaymentObserver;
 import se.kth.iv1350.processsale.model.Sale;
 
 /**
@@ -24,6 +30,7 @@ public class Controller {
 	private ItemRegistry itemReg; 
 	private Printer printer; 
 	private CashRegister cashRegister; 
+	private List <PaymentObserver> paymentObservers = new ArrayList<>();
 
 	/**
 	 * Creates a new instance. 
@@ -52,9 +59,11 @@ public class Controller {
 	 * @param itemID Represents an item identifier for an item. 
 	 * @param quantity Represents the quantity of the item. 
 	 * @return A string containing information about the scanned item, if the {@link itemID} exists. 
+	 * @throws InvalidItemIDException if the item identifier is not found in the registry
 	 */
-	public String scanItem (String itemID, int quantity)
+	public String scanItem (String itemID, int quantity) throws InvalidItemIDException, OperationFaildException
 	{
+		try {
 		ItemDTO item = null;
 		String itemInfo = ""; 
 		String itemStatus = itemReg.checkItem(itemID);
@@ -66,13 +75,13 @@ public class Controller {
 		}
 		if (itemStatus.equals("itemAlreadyRegistered")){
 			sale.addQuantity(itemID);
-
 		}
-		if (itemStatus.equals("itemNotIdentified"))
-			itemInfo = "Wrong item ID";
-
 		
 		return itemInfo;
+		} catch (ItemRegistryException exc) {
+			throw new OperationFaildException ("Servers are down", exc);
+		}
+		
 }
 	/**
 	 * Ends the current sale. 
@@ -80,8 +89,18 @@ public class Controller {
 	 */
 	public double endSale() {
 	return sale.getAmountToPay();
-	}	
+
 	
+	}	
+	/**
+	 * Checks if there is any discounts for the specified customer.
+	 * @param id The customer identification number. 
+	 * @param amountToPay The total cost of the sale 
+	 * @return A discount based on the customer identification number or the total cost of the sale. 
+	 */
+	public double checkForDiscount (String id, double amountToPay ) {
+		return sale.applyDiscount(id, amountToPay);
+	}
 	/**
 	 * Makes a payment with the given {@link amount}. Updates the external systems and adds the 
 	 * given {@link Amount} to the cash register. 
@@ -90,6 +109,7 @@ public class Controller {
 	 */
 	public Change makePayment(double amount) {
 		Payment amountPaid = new Payment(amount);
+		cashRegister.addPaymentObservers(paymentObservers);
 		cashRegister.updateBalance(amountPaid);
 		Change change = sale.completeSale(amountPaid, invSys, accSys);
 		return change;
@@ -102,5 +122,9 @@ public class Controller {
 	
 	public void printReciept () {
 		sale.printReceipt(printer);
+	}
+	
+	public void addPaymentObserver(PaymentObserver obs) {
+		paymentObservers.add(obs);
 	}
 }	

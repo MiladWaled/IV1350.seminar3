@@ -1,0 +1,25 @@
+------------LOG---------
+Date: 2020-05-13
+Time: 22:59:04.075
+The following exception was thrown: Servers are down
+se.kth.iv1350.processsale.controller.OperationFaildException: Servers are down
+	at se.kth.iv1350.processsale.controller.Controller.scanItem(Controller.java:82)
+	at se.kth.iv1350.processsale.view.View.scanItem(View.java:59)
+	at se.kth.iv1350.processsale.view.View.sampleExecution(View.java:45)
+	at se.kth.iv1350.processsale.startup.Main.main(Main.java:33)
+Caused by: se.kth.iv1350.processsale.integration.ItemRegistryException: The database can not be called, the server is not running
+	at se.kth.iv1350.processsale.integration.ItemRegistry.checkItem(ItemRegistry.java:38)
+	at se.kth.iv1350.processsale.controller.Controller.scanItem(Controller.java:69)
+	... 3 more
+------------------------
+------------LOG---------
+Date: 2020-05-13
+Time: 22:59:04.076
+The following exception was thrown: The following item ID: 1121 is invalid
+se.kth.iv1350.processsale.integration.InvalidItemIDException: The following item ID: 1121 is invalid
+	at se.kth.iv1350.processsale.integration.ItemRegistry.checkItem(ItemRegistry.java:57)
+	at se.kth.iv1350.processsale.controller.Controller.scanItem(Controller.java:69)
+	at se.kth.iv1350.processsale.view.View.scanItem(View.java:59)
+	at se.kth.iv1350.processsale.view.View.sampleExecution(View.java:46)
+	at se.kth.iv1350.processsale.startup.Main.main(Main.java:33)
+------------------------

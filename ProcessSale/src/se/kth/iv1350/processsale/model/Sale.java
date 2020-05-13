@@ -1,12 +1,14 @@
 package se.kth.iv1350.processsale.model;
 
 import java.time.LocalTime;
+
 import java.util.ArrayList;
 
 import se.kth.iv1350.processsale.integration.AccountingSystem;
 import se.kth.iv1350.processsale.integration.InventorySystem;
 import se.kth.iv1350.processsale.integration.ItemDTO;
 import se.kth.iv1350.processsale.integration.Printer;
+import se.kth.iv1350.processsale.integration.discount.DiscounterFactory;
 
 /**
  * Represents a sale between a customer and the store.  
@@ -20,6 +22,7 @@ public class Sale {
 	private Change change; 
 	private ArrayList <ItemDTO> itemsPurchased = new ArrayList<ItemDTO>();
 	private Receipt receiptOfSale; 
+	private double totalAfterDiscount;
 	
 	/**
 	 * creates a new instance.  
@@ -29,6 +32,7 @@ public class Sale {
 		this.saleTime = LocalTime.now();
 		this.totalPrice = 0;
 		this.totalVAT = 0;
+		this.totalAfterDiscount = 0;
 		
 	}
 
@@ -81,7 +85,18 @@ public class Sale {
 		updatePriceAndVATForRegisteredItem(updatedItem);
 		
 	}
-	
+	/**
+	 * Applies discount for specific customer. 
+	 * @param id The customer's identification number.
+	 * @param amountToPay Total cost of the sale 
+	 * @return
+	 */
+	public double applyDiscount (String id, double amountToPay) {
+		DiscounterFactory factory = DiscounterFactory.getFactory();
+		double discountRate = (factory.getDefaultDiscount().getDiscount(id, amountToPay).getDiscountRate());
+		totalAfterDiscount = (getAmountToPay()) - (getAmountToPay()) * (discountRate);
+		return totalVAT + totalPrice;
+	}
 	/**
 	 * Completes the sale by updating the external systems and 
 	 * returning the change (if any) to the customer. 
@@ -89,7 +104,7 @@ public class Sale {
 	 */
 	public Change completeSale(Payment amountPaid, InventorySystem invSys, AccountingSystem accSys) {
 		this.amountPaid = amountPaid; 
-		this.change = new Change (getAmountToPay(), amountPaid);
+		this.change = new Change (totalAfterDiscount, amountPaid);
 		updateExternalSystems(invSys, accSys);
 		return change;
 	}
@@ -152,6 +167,7 @@ public class Sale {
 		addLine(saleInfo, "Number of items bought: " + getQuantity());
 		addLine(saleInfo, "Info about items bought: " + getItemsBought());
 		addLine(saleInfo, "Total amount to pay: " + getAmountToPay());
+		addLine(saleInfo, "Total amount to pay after discount applied: " + totalAfterDiscount);
 		addLine(saleInfo, "Amount paid: " + amountPaid.getAmount());
 		addLine (saleInfo, "Change: " + change.getAmount());
 		return saleInfo.toString();

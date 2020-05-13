@@ -22,17 +22,31 @@ public class ItemRegistry {
 		itemList.add (new ItemDTO ("Apple", "1235", 1, 5, 20));
 		itemList.add (new ItemDTO ("Bread", "1236", 1, 25, 10));
 		itemList.add (new ItemDTO ("Meat", "1237", 1, 100 ,25));
+	//	itemList.add(new ItemDTO("ERROR", "1111", 1,0,0));
 		
 	}
+	
+	
+	
 	/**
 	 * Checks if the item identifier is in the register. 
 	 * @param itemID The unique item identifier of a specific item.  
 	 * @return A string depending on if the item is not already registered
 	 * in the sale or not or if the item identifier is not found in the registry. 
+	 * @throws InvalidItemIDException if the item identifier does not exist 
+	 * in the registry
 	 */
-	public  String checkItem (String itemID) {
+	public  String checkItem (String itemID) throws InvalidItemIDException {
 		
+		
+		if (itemID.equals("CRASH")) {
+			throw new ItemRegistryException ("The database can not be called, the server is not running");
+			
+		}
 		for (ItemDTO item: itemList) {
+			
+			
+				
 			if (itemID.equals(item.getItemID()) && item.isScanned()) {
 				return "itemAlreadyRegistered";
 			}
@@ -42,8 +56,10 @@ public class ItemRegistry {
 				return "OK"; 
 			}
 			
+			
+			
 		}
-		return "itemNotIdentified";
+		throw new InvalidItemIDException (itemID);
 
 	
 	}

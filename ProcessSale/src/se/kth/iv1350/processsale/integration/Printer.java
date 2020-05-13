@@ -7,8 +7,16 @@ import se.kth.iv1350.processsale.model.Receipt;
  *
  */
 public class Printer {
-
+	private static final Printer PRINTER = new Printer();
 	private Receipt receiptOfSale; 
+
+	private Printer () {
+		
+	}
+
+	public static Printer getPrinter() {
+		return PRINTER;
+	}
 	
 	/**
 	 * Prints the receipt of the specific sale. 

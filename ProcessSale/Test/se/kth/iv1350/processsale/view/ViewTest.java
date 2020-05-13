@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 
 import org.junit.jupiter.api.AfterEach;
@@ -21,8 +22,8 @@ class ViewTest {
 	private ByteArrayOutputStream printoutBuffer; 
 	private PrintStream originalSysOut; 
 	@BeforeEach
-	void setUp()  {
-		Printer printer = new Printer();
+	void setUp() throws IOException  {
+		Printer printer = Printer.getPrinter();
 		RegistryHandler regHandler = new RegistryHandler();
 		ExternalSystemHandler exSysHandler = new ExternalSystemHandler();
 		Controller contr = new Controller (printer, regHandler, exSysHandler); 

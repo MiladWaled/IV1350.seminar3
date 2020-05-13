@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 
 import org.junit.jupiter.api.AfterEach;
@@ -37,7 +38,7 @@ class MainTest {
 
 	
 	@Test
-	void test() {
+	void test() throws IOException {
 		String [] args = null; 
 		Main.main(args);
 		
